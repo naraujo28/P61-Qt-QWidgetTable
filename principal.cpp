@@ -1,6 +1,8 @@
 #include "principal.h"
 #include "ui_principal.h"
-#include "personadialog.h"
+
+
+#include "QDebug"
 
 Principal::Principal(QWidget *parent)
     : QWidget(parent)
@@ -43,6 +45,32 @@ void Principal::on_btnAgregar_clicked()
     ui->tblLista->setItem(fila, APELLIDO, new QTableWidgetItem(apellido));
     ui->tblLista->setItem(fila, TELEFONO, new QTableWidgetItem(telefono));
     ui->tblLista->setItem(fila, EMAIL, new QTableWidgetItem(email));
+
+}
+
+
+void Principal::on_btnGuardar_clicked()
+{
+    int filas = ui->tblLista->rowCount();
+    if (filas == 0){
+        QMessageBox::warning(this,"Guardar contactos","Agenda sin datos para guardar");
+        return;
+    }
+
+    QFile archivo("agenda.csv");
+    if (archivo.open(QFile::WriteOnly | QFile::Truncate)) {
+        QTextStream salida(&archivo);
+        for (int i=0; i<filas; i++) {
+            QTableWidgetItem *nombre = ui->tblLista->item(i, NOMBRE);
+            QTableWidgetItem *apellido = ui->tblLista->item(i, APELLIDO);
+            QTableWidgetItem *telefono = ui->tblLista->item(i, TELEFONO);
+            QTableWidgetItem *email = ui->tblLista->item(i, EMAIL);
+            salida << nombre->text() << ";" << apellido->text() << ";";
+            salida << telefono->text() << ";" << email->text() << "\n";
+        }
+        archivo.close();
+        QMessageBox::information(this,"Guardar contactos","Contactos guardados con éxito");
+    }
 
 }
 
