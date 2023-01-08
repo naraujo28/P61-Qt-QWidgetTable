@@ -26,10 +26,12 @@ private slots:
 
 private:
     Ui::Principal *ui;
-
+    const QString ARCHIVO = "agenda.csv";
     enum Columna
     {
         NOMBRE, APELLIDO, TELEFONO, EMAIL
     };
+
+    void cargarContactos();
 };
 #endif // PRINCIPAL_H

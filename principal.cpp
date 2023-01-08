@@ -15,6 +15,9 @@ Principal::Principal(QWidget *parent)
     QStringList titulo;
     titulo << "Nombre" << "Apellido" << "Teléfono" << "E-mail";
     ui->tblLista->setHorizontalHeaderLabels(titulo);
+    // Leer desde el archivo
+    cargarContactos();
+
 }
 
 Principal::~Principal()
@@ -51,13 +54,14 @@ void Principal::on_btnAgregar_clicked()
 
 void Principal::on_btnGuardar_clicked()
 {
+    // Verificar que exista datos para guardar
     int filas = ui->tblLista->rowCount();
     if (filas == 0){
         QMessageBox::warning(this,"Guardar contactos","Agenda sin datos para guardar");
         return;
     }
-
-    QFile archivo("agenda.csv");
+    // Abrir el archivo y guardar
+    QFile archivo(ARCHIVO);
     if (archivo.open(QFile::WriteOnly | QFile::Truncate)) {
         QTextStream salida(&archivo);
         for (int i=0; i<filas; i++) {
@@ -70,7 +74,35 @@ void Principal::on_btnGuardar_clicked()
         }
         archivo.close();
         QMessageBox::information(this,"Guardar contactos","Contactos guardados con éxito");
+    }else{
+        QMessageBox::critical(this,"Guardar contactos", "No se puede escribir sobre " + ARCHIVO);
     }
 
+}
+
+void Principal::cargarContactos()
+{
+    // Verificar si el archivo existe
+    QFile archivo(ARCHIVO);
+    if (!archivo.exists())
+        return;
+
+    // cargar datos
+    if (archivo.open(QFile::ReadOnly)) {
+        QTextStream entrada(&archivo);
+        int fila;
+        while(!entrada.atEnd()){
+            QString linea = entrada.readLine();
+            QStringList datos = linea.split(";");
+            //Agregar a la tabla
+            fila = ui->tblLista->rowCount();
+            ui->tblLista->insertRow(fila);
+            ui->tblLista->setItem(fila, NOMBRE, new QTableWidgetItem(datos[NOMBRE]));
+            ui->tblLista->setItem(fila, APELLIDO, new QTableWidgetItem(datos[APELLIDO]));
+            ui->tblLista->setItem(fila, TELEFONO, new QTableWidgetItem(datos[TELEFONO]));
+            ui->tblLista->setItem(fila, EMAIL, new QTableWidgetItem(datos[EMAIL]));
+        }
+        archivo.close();
+    }
 }
 
