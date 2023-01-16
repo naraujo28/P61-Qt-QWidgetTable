@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>recursos/cruzar.png</file>
+        <file>recursos/directorio-telefonico.png</file>
+    </qresource>
+</RCC>

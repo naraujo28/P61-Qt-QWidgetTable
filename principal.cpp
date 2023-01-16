@@ -11,6 +11,7 @@ Principal::Principal(QWidget *parent)
     ui->setupUi(this);
     setWindowTitle("Agenda telefónica");
     // Configurar la tabla
+    ui->tblLista->setStyleSheet("background-color: rgb(255, 254, 185)");
     ui->tblLista->setColumnCount(4);
     QStringList titulo;
     titulo << "Nombre" << "Apellido" << "Teléfono" << "E-mail";
@@ -37,17 +38,14 @@ void Principal::on_btnAgregar_clicked()
         return;
     }
     // Recuperar los datos ingresados
-    QString nombre = pd.nombre();
-    QString apellido = pd.apellido();
-    QString telefono = pd.telefono();
-    QString email = pd.email();
+   Persona *p = pd.persona();
     //Agregar a la tabla
     int fila = ui->tblLista->rowCount();
     ui->tblLista->insertRow(fila);
-    ui->tblLista->setItem(fila, NOMBRE, new QTableWidgetItem(nombre));
-    ui->tblLista->setItem(fila, APELLIDO, new QTableWidgetItem(apellido));
-    ui->tblLista->setItem(fila, TELEFONO, new QTableWidgetItem(telefono));
-    ui->tblLista->setItem(fila, EMAIL, new QTableWidgetItem(email));
+    ui->tblLista->setItem(fila, NOMBRE, new QTableWidgetItem(p->nombre()));
+    ui->tblLista->setItem(fila, APELLIDO, new QTableWidgetItem(p->apellido()));
+    ui->tblLista->setItem(fila, TELEFONO, new QTableWidgetItem(p->telefono()));
+    ui->tblLista->setItem(fila, EMAIL, new QTableWidgetItem(p->email()));
 
 }
 
@@ -106,3 +104,49 @@ void Principal::cargarContactos()
     }
 }
 
+
+void Principal::on_btnEditar_clicked()
+{
+    int cont=0;
+    QList<QModelIndex>seleccion = ui->tblLista->selectionModel()->selectedRows();
+
+    if(seleccion.isEmpty()){
+        QMessageBox::information(this,"Aviso","No se ha seleccionado ninguna fila");
+        return;
+    }
+
+    QList<QModelIndex>::iterator i;
+
+    for (auto &&i : seleccion){
+        cont++;
+    }
+
+    if(cont>1){
+        QMessageBox::information(this,"Aviso","Seleccione solo una fila");
+        return;
+    }
+
+    int row = ui->tblLista->currentRow();
+
+    QTableWidgetItem *nombre = ui->tblLista->item(row, NOMBRE);
+    QTableWidgetItem *apellido = ui->tblLista->item(row, APELLIDO);
+    QTableWidgetItem *telefono = ui->tblLista->item(row, TELEFONO);
+    QTableWidgetItem *email = ui->tblLista->item(row, EMAIL);
+
+    PersonaDialog pd(this);
+    pd.setWindowTitle("Agregar contacto");
+
+    pd.set_datos(nombre->text(), apellido->text(), telefono->text(), email->text());
+
+    int res = pd.exec();
+    if (res == QDialog::Rejected){
+        return;
+    }
+    // Recuperar el objeto del cuadro de dialogo
+    Persona *p = pd.persona();
+
+    ui->tblLista->setItem(row, NOMBRE, new QTableWidgetItem(p->nombre()));
+    ui->tblLista->setItem(row, APELLIDO, new QTableWidgetItem(p->apellido()));
+    ui->tblLista->setItem(row, TELEFONO, new QTableWidgetItem(p->telefono()));
+    ui->tblLista->setItem(row, EMAIL, new QTableWidgetItem(p->email()));
+}
